@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🔥 Ultimate Quiz Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .quiz-box {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.9);}
+      to {opacity: 1; transform: scale(1);}
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    #timer {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #ffeb3b;
+    }
+
+    #question {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: block;
+      background: #ffffff20;
+      border: 1px solid #fff;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px auto;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #ffffff40;
+    }
+
+    .btn.correct {
+      background-color: #4caf50;
+      border: none;
+    }
+
+    .btn.wrong {
+      background-color: #f44336;
+      border: none;
+    }
+
+    #next-btn {
+      display: none;
+      margin-top: 20px;
+      background: #2196f3;
+      color: white;
+    }
+
+    #score-box {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .hide {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-box">
+  <h1>🔥 Ultimate Quiz Game</h1>
+  <div id="timer">Time Left: <span id="time">10</span> sec</div>
+  <div id="question">Loading...</div>
+  <div id="answer-buttons"></div>
+  <button id="next-btn" class="btn">Next</button>
+  <div id="score-box" class="hide"></div>
+</div>
+
+<script>
+  const questions = [
+    {
+      question: "Which planet is known as the Red Planet?",
+      answers: ["Earth", "Mars", "Jupiter", "Venus"],
+      correct: "Mars"
+    },
+    {
+      question: "What is the capital of Japan?",
+      answers: ["Seoul", "Beijing", "Tokyo", "Bangkok"],
+      correct: "Tokyo"
+    },
+    {
+      question: "Which is the largest ocean?",
+      answers: ["Atlantic", "Indian", "Arctic", "Pacific"],
+      correct: "Pacific"
+    },
+    {
+      question: "What is the boiling point of water?",
+      answers: ["100°C", "90°C", "110°C", "80°C"],
+      correct: "100°C"
+    }
+  ];
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let timer;
+  let timeLeft = 10;
+
+  const questionEl = document.getElementById("question");
+  const answerButtons = document.getElementById("answer-buttons");
+  const nextBtn = document.getElementById("next-btn");
+  const scoreBox = document.getElementById("score-box");
+  const timerEl = document.getElementById("time");
+
+  function startQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    nextBtn.innerText = "Next";
+    scoreBox.classList.add("hide");
+    showQuestion();
+  }
+
+  function showQuestion() {
+    resetState();
+    startTimer();
+
+    const q = questions[currentQuestionIndex];
+    questionEl.innerText = q.question;
+
+    q.answers.forEach(answer => {
+      const btn = document.createElement("button");
+      btn.innerText = answer;
+      btn.classList.add("btn");
+      if (answer === q.correct) btn.dataset.correct = true;
+      btn.addEventListener("click", selectAnswer);
+      answerButtons.appendChild(btn);
+    });
+  }
+
+  function resetState() {
+    clearInterval(timer);
+    timeLeft = 10;
+    timerEl.innerText = timeLeft;
+    nextBtn.style.display = "none";
+    answerButtons.innerHTML = "";
+  }
+
+  function startTimer() {
+    timer = setInterval(() => {
+      timeLeft--;
+      timerEl.innerText = timeLeft;
+      if (timeLeft === 0) {
+        clearInterval(timer);
+        disableButtons();
+        nextBtn.style.display = "block";
+      }
+    }, 1000);
+  }
+
+  function selectAnswer(e) {
+    clearInterval(timer);
+    const selectedBtn = e.target;
+    const correct = selectedBtn.dataset.correct === "true";
+    if (correct) {
+      score++;
+    }
+
+    Array.from(answerButtons.children).forEach(btn => {
+      btn.disabled = true;
+      if (btn.dataset.correct === "true") {
+        btn.classList.add("correct");
+      } else {
+        btn.classList.add("wrong");
+      }
+    });
+
+    nextBtn.style.display = "block";
+  }
+
+  function disableButtons() {
+    Array.from(answerButtons.children).forEach(btn => btn.disabled = true);
+  }
+
+  function showScore() {
+    resetState();
+    questionEl.innerText = "✅ Quiz Completed!";
+    scoreBox.classList.remove("hide");
+    scoreBox.innerHTML = `<strong>Your Score:</strong> ${score} / ${questions.length}`;
+    nextBtn.innerText = "Play Again";
+    nextBtn.style.display = "block";
+  }
+
+  nextBtn.addEventListener("click", () => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      showQuestion();
+    } else {
+      showScore();
+    }
+  });
+
+  startQuiz();
+</script>
+
+</body>
+</html>
